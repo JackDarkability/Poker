@@ -54,12 +54,11 @@ class player:
 
     def lose(self):
         self.moneyLost += self.amountBetted
-        self.amountBetted = 0
 
     def win(self,moneyInPot):
         self.moneyWon += moneyInPot
-        self.amountBetted = 0
-    
+        self.currentMoney += moneyInPot
+
     def bet(self, amount):
         if(amount > self.currentMoney):
             raise Exception("Not enough money to bet that much")
@@ -110,6 +109,14 @@ class player:
         fullHand.extend(cardsOnTable)
         self.result,self.topCard = calculateHandResult(fullHand)
 
+    def reset(self):
+        self.hand = []
+        self.amountBetted = 0
+        self.folded = False
+        self.result=0 # Holds numerical value on hand result, 0 being high card and 8 being straight flush
+        self.topCard = None # Holds top card so can be compared when equal hand type
+
+
 def calculateHandResult(cards): # cards is 7 cards in a list, representing the 5 cards on the table and 2 cards in hand.
 
     #Need to add functionality for where same hand can be made by multiple players, e.g. two players have pairs and so gets decided by the values.
@@ -147,10 +154,12 @@ def calculateHandResult(cards): # cards is 7 cards in a list, representing the 5
 
 
 def isStraight(cards):
-    #Does not take into account A working as 1 yet!!!
     maxSequenceCounter=0
     maxCardOfSequence = cards[0]
     sequenceCounter=0
+    if cards[0].value=="2" and cards[-1].value=="A":
+        maxCardOfSequence = cards[-1]
+        maxSequenceCounter = 1
     for index,card in enumerate(cards):
         try:
             if(values.index(card.value)+1 == values.index(cards[index+1].value)):
@@ -210,9 +219,15 @@ def getWinner(players,cardsOnTable):
         #print(player.name+" has "+str(hands[player.result]) + ", a "+str(player.result))
 
     players.sort(reverse=True)
+    winningIndex = 0
     winningPlayer = players[0]
+    while(winningPlayer.folded):
+        print(winningIndex)
+        winningIndex+=1
+        winningPlayer = players[winningIndex]
+
     for player in players:
-        if(player.result == winningPlayer.result):
+        if(player.result == winningPlayer.result and player.folded == False):
             if(card(player.topCard,"Hearts") > card(winningPlayer.topCard,"Hearts")):
                 # Hearts is just a random suit to compare by
                 winningPlayer = player
@@ -242,6 +257,79 @@ def makeCardsReadable(list):
         readableList.append(i.__str__())
     return readableList
 
+def bettingRound(players):
+    if(onePersonLeft(players)==False):
+        for player in players: # First pass
+            if(player.folded):
+                continue
+            printBettedAmount(players)
+            print(player.name + ", you have "+str(player.getHand()) +" and have $"+str(player.currentMoney)+". would you like to fold,check/call or raise?")
+            action = input()
+            if(action == "fold"):
+                player.fold()
+            elif(action == "call"):
+                player.bet(getMaxBetted(players)-player.amountBetted)
+            elif(action == "raise"):
+                print("How much would you like to raise by?")
+                amountToBet = int(input())
+                player.bet(amountToBet)
+            else:
+                print("INVALID INPUT, WRONG. FOLDING.")
+                player.fold()
+
+
+    while((allBetSame(players)==False) and onePersonLeft(players)==False):
+        for player in players:
+            if(player.folded or (player.amountBetted == getMaxBetted(players))):
+                continue
+            printBettedAmount(players)
+            print(player.name + ", you have "+str(player.getHand()) +" and have $"+str(player.currentMoney)+". would you like to fold,call or raise?")
+            action = input()
+            if(action == "fold"):
+                player.fold()
+            elif(action == "call"):
+                player.bet(getMaxBetted(players)-player.amountBetted)
+            elif(action == "raise"):
+                print("How much would you like to raise by?")
+                amountToBet = int(input())
+                player.bet(amountToBet)
+            else:
+                print("INVALID INPUT, WRONG. FOLDING.")
+                player.fold()
+
+            if(allBetSame(players) or onePersonLeft(players)):
+                break
+    return players
+
+def allBetSame(players):
+    betAmount=players[0].amountBetted
+    for player in players:
+        if(player.amountBetted != betAmount and (not player.folded)):
+            return False
+    return True
+
+def onePersonLeft(players):
+    playersLeft = 0
+    for player in players:
+        if(not player.folded):
+            playersLeft+=1
+    if(playersLeft == 1):
+        return True
+    return False
+
+def printBettedAmount(players):
+    for player in players:
+        if(player.folded):
+            continue
+        print(player.name + " has betted $"+str(player.amountBetted))
+
+def getMaxBetted(players):
+    maxBetted = 0
+    for player in players:
+        if(player.amountBetted > maxBetted):
+            maxBetted = player.amountBetted
+    return maxBetted
+
 deck = []
 suits = ["Hearts", "Diamonds", "Clubs", "Spades"]
 values = ["2","3","4","5","6","7","8","9","10","J","Q","K","A"]
@@ -249,6 +337,7 @@ hands = ["High Card","Pair","Two Pair","Three of a Kind","Straight","Flush","Ful
 players = [] 
 cardsOnTable = []
 startingMoney = 1000
+blindCost = 10
 
 for suit in suits:
     for value in values:
@@ -261,19 +350,120 @@ players.append(player(startingMoney,"Dave"))
 players.append(player(startingMoney,"Jim"))
 
 def playRound(players,deck):
+    players.append(players.pop(0)) # Rotate players
     cardsOnTable = []
-    players,deck = dealToPlayers(players,deck)
-    players,deck = dealToPlayers(players,deck)
-    #print(players[0].name + ", you have "+str(players[0].getHand()) +" and have $"+str(players[0].currentMoney)+". How much would you like to bet?")
-    #amountToBet = int(input())
-    #players[0].bet(amountToBet)
-    #players[1].bet(100)
+    for player in players:
+        player.reset()
 
+    players,deck = dealToPlayers(players,deck)
+    players,deck = dealToPlayers(players,deck)
+
+    for index,player in enumerate(players):
+        if(index == 0):
+            players[0].bet(blindCost//2)
+            print(players[0].name + " bets a small blind of $"+str(blindCost//2))
+
+        elif(index == 1):
+            players[1].bet(blindCost)
+            print(players[1].name + " bets a big blind of $"+str(blindCost))
+        
+        else:
+            if(player.folded):
+                continue
+            printBettedAmount(players)
+            print(player.name + ", you have "+str(player.getHand()) +" and have $"+str(player.currentMoney)+". would you like to fold,check/call or raise?")
+            action = input()
+            if(action == "fold"):
+                player.fold()
+            elif(action == "call"):
+                player.bet(getMaxBetted(players)-player.amountBetted)
+            elif(action == "raise"):
+                print("How much would you like to raise by?")
+                amountToBet = int(input())
+                player.bet(amountToBet)
+            else:
+                print("INVALID INPUT, WRONG. FOLDING.")
+                player.fold()
+
+    while(allBetSame(players)==False and onePersonLeft(players)==False):
+        for player in players:
+            if(player.folded or (player.amountBetted == getMaxBetted(players))):
+                continue
+            printBettedAmount(players)
+            print(player.name + ", you have "+str(player.getHand()) +" and have $"+str(player.currentMoney)+". would you like to fold,check/call or raise?")
+            action = input()
+            if(action == "fold"):
+                player.fold()
+            elif(action == "call"):
+                player.bet(getMaxBetted(players)-player.amountBetted)
+            elif(action == "raise"):
+                print("How much would you like to raise by?")
+                amountToBet = int(input())
+                player.bet(getMaxBetted(players)-player.amountBetted)
+                player.bet(amountToBet)
+
+            else:
+                print("INVALID INPUT, WRONG. FOLDING.")
+                player.fold()
+
+            if(allBetSame(players) or onePersonLeft(players)):
+                break
+
+    if(onePersonLeft(players)):
+        print("Only one person left, they win!")
+        for player in players:
+            if(not player.folded):
+                print(player.name +" wins!")
+                player.win(sum([player.amountBetted for player in players]))
+            else:
+                player.lose()
+        return (players,deck)
+    
     cardsOnTable,deck = dealToTable(cardsOnTable,deck)
     cardsOnTable,deck = dealToTable(cardsOnTable,deck)
     cardsOnTable,deck = dealToTable(cardsOnTable,deck)
+
+    print(makeCardsReadable(cardsOnTable))
+    players = bettingRound(players)
+    
+    if(onePersonLeft(players)):
+        print("Only one person left, they win!")
+        for player in players:
+            if(not player.folded):
+                print(player.name +" wins!")
+                player.win(sum([player.amountBetted for player in players]))
+            else:
+                player.lose()
+        return (players,deck)
+            
     cardsOnTable,deck = dealToTable(cardsOnTable,deck)
+    print(makeCardsReadable(cardsOnTable))
+    players = bettingRound(players)
+
+    if(onePersonLeft(players)):
+        print("Only one person left, they win!")
+        for player in players:
+            if(not player.folded):
+                print(player.name +" wins!")
+                player.win(sum([player.amountBetted for player in players]))
+            else:
+                player.lose()
+        return (players,deck)
+    
     cardsOnTable,deck = dealToTable(cardsOnTable,deck)
+    print(makeCardsReadable(cardsOnTable))
+    players = bettingRound(players)
+
+    if(onePersonLeft(players)):
+        print("Only one person left, they win!")
+        for player in players:
+            if(not player.folded):
+                print(player.name +" wins!")
+                player.win(sum([player.amountBetted for player in players]))
+            else:
+                player.lose()
+        return (players,deck)
+
     print(players[0].name+" has "+str(players[0].getHand()))
     print(players[1].name+" has "+str(players[1].getHand()))
     print(makeCardsReadable(cardsOnTable))
@@ -281,12 +471,21 @@ def playRound(players,deck):
     players[1].calculateHandResult(cardsOnTable)
     print(players[0].name+" has "+hands[players[0].result] +" with a "+str(players[0].topCard))
     print(players[1].name+" has "+hands[players[1].result] +" with a "+str(players[1].topCard))
-    print(getWinner(players,cardsOnTable).name +" wins!")
+    winner = getWinner(players,cardsOnTable)
+    print(winner.name +" wins!")
 
+    for player in players:
+        if(player.name==winner.name):
+            player.win(sum([player.amountBetted for player in players]))
+        else:
+            player.lose()
 
     return (players,deck) # for changes in money and cards
 
 players,deck = playRound(players,deck)
+for player in players:
+    print(player.name + " has $"+str(player.currentMoney))
+
 
 #players[0].hand=[card("J","Hearts"),card("J","Diamonds")]
 #players[1].hand = [card("9","Spades"),card("A","Spades")]
@@ -297,8 +496,6 @@ players,deck = playRound(players,deck)
 #print(players[1].topCard)
 '''
 BUGS
-No way to deal with two players having the same hand, e.g. two players have pairs and so gets decided by the values.
-No way to deal with A working as 1 in a straight
 Does not discriminate between hands results being separate, e.g not a straight flush but a straight and a flush separately in the hand.
 '''
 
