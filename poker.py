@@ -1,4 +1,4 @@
-import random
+import random, copy
 
 class card:
     def __init__(self, value, suit):
@@ -50,6 +50,7 @@ class player:
         self.moneyLost = 0 # This will be how much money lost in total throughout the game
         self.folded = False
         self.result=0 # Holds numerical value on hand result, 0 being high card and 8 being straight flush
+        self.topCard = None # Holds top card so can be compared when equal hand type
 
     def lose(self):
         self.moneyLost += self.amountBetted
@@ -104,50 +105,51 @@ class player:
             handReadable.append(i.__str__())
         return handReadable
         
-    def getHandResult(self,cardsOnTable):
-        fullHand = self.hand
+    def calculateHandResult(self,cardsOnTable):
+        fullHand = [copy.deepcopy(card) for card in self.hand]
         fullHand.extend(cardsOnTable)
-        self.result = getHandResult(fullHand)
+        self.result,self.topCard = calculateHandResult(fullHand)
 
-def getHandResult(cards): # cards is 7 cards in a list, representing the 5 cards on the table and 2 cards in hand.
+def calculateHandResult(cards): # cards is 7 cards in a list, representing the 5 cards on the table and 2 cards in hand.
 
     #Need to add functionality for where same hand can be made by multiple players, e.g. two players have pairs and so gets decided by the values.
     cards.sort()
-    cardIsStraight = isStraight(cards)
-    cardIsFlush = isFlush(cards)
+    cardIsStraight,maxCardStraight = isStraight(cards)
+    cardIsFlush,maxCardFlush = isFlush(cards)
     counts = getCountsOfCards(cards)
     highestCard = getHighestCard(cards)
 
-    if(cardIsStraight and cardIsFlush):
-        return 8
+    if(cardIsStraight and cardIsFlush): # Straight flush
+        return (8,maxCardStraight.value)
     
-    if(counts[max(counts,key=counts.get)]>=4):
-        return 7
+    if(counts[max(counts,key=counts.get)]>=4): #4 of a kind
+        return 7,max(counts,key=counts.get)
     
-    if((3 in counts.values() and 2 in counts.values()) or (list(counts.values()).count(3) == 2)):
-        return 6
+    if((3 in counts.values() and 2 in counts.values()) or (list(counts.values()).count(3) == 2)): # Full house
+        return 6,max(counts,key=counts.get)
     
-    if(cardIsFlush):
-        return 5
+    if(cardIsFlush): # Flush
+        return (5,maxCardFlush.value)
     
-    if(cardIsStraight):
-        return 4
+    if(cardIsStraight): # Straight
+        return (4,maxCardStraight.value)
     
-    if(counts[max(counts,key=counts.get)]==3):
-        return 3
+    if(counts[max(counts,key=counts.get)]==3):  # 3 of a kind
+        return (3,max(counts,key=counts.get))
 
-    if(list(counts.values()).count(2) == 2):
-        return 2
+    if(list(counts.values()).count(2) == 2): # Two pair
+        return (2,max(counts,key=counts.get)) # Might get lower of the 2 pairs, will have to check
     
-    if(counts[max(counts,key=counts.get)]==2):
-        return 1
+    if(counts[max(counts,key=counts.get)]==2): # Pair
+        return (1,max(counts,key=counts.get))
 
-    return 0
+    return 0,highestCard.value # High card
 
 
 def isStraight(cards):
     #Does not take into account A working as 1 yet!!!
     maxSequenceCounter=0
+    maxCardOfSequence = cards[0]
     sequenceCounter=0
     for index,card in enumerate(cards):
         try:
@@ -156,16 +158,18 @@ def isStraight(cards):
             else:
                 if(sequenceCounter > maxSequenceCounter):
                     maxSequenceCounter = sequenceCounter
+                    maxCardOfSequence = card
                 sequenceCounter=0
         except IndexError:
             if(sequenceCounter > maxSequenceCounter):
                 maxSequenceCounter = sequenceCounter
             sequenceCounter=0
-    if(maxSequenceCounter >= 5):
-        return True
+
+    if(maxSequenceCounter >= 4):
+        return (True,maxCardOfSequence)
 
     else:
-        return False
+        return (False,maxCardOfSequence)
 
 def isFlush(cards):
     suitsOfCards = []
@@ -174,9 +178,12 @@ def isFlush(cards):
     
     for suit in suits:
         if(suitsOfCards.count(suit) >= 5):
-            return True
+            for card in cards:
+                if(card.suit == suit):
+                    maxCardOfFlush = card
+            return (True,maxCardOfFlush)
     
-    return False
+    return (False,None)
 
 def getCountsOfCards(cards):
     # Gets the counts of each card in the list of cards
@@ -197,16 +204,19 @@ def getHighestCard(cards):
     return highestCard
         
 def getWinner(players,cardsOnTable):
-
+    #tempHand = [copy.deepcopy(player) for player in players]
     for player in players:
-        player.hand = player.hand + cardsOnTable
-        player.hand.sort()
-        player.getHandResult()
+        player.calculateHandResult(cardsOnTable)
+        #print(player.name+" has "+str(hands[player.result]) + ", a "+str(player.result))
 
-    results=players
-    results.sort()
-    results.reverse()
-    return results[0]
+    players.sort(reverse=True)
+    winningPlayer = players[0]
+    for player in players:
+        if(player.result == winningPlayer.result):
+            if(card(player.topCard,"Hearts") > card(winningPlayer.topCard,"Hearts")):
+                # Hearts is just a random suit to compare by
+                winningPlayer = player
+    return winningPlayer
 
     
 def dealToAll(players,cardsOnTable,deck):
@@ -248,51 +258,47 @@ random.shuffle(deck)
 
 
 players.append(player(startingMoney,"Dave"))
-
-'''
-players,cardsOnTable,deck = dealToAll(players,cardsOnTable,deck)
-players,cardsOnTable,deck = dealToAll(players,cardsOnTable,deck)
-cardsOnTable,deck = dealToTable(cardsOnTable,deck)
-cardsOnTable,deck = dealToTable(cardsOnTable,deck)
-cardsOnTable,deck = dealToTable(cardsOnTable,deck)
-
-print(players[0].getHand())
-
-print(makeCardsReadable(cardsOnTable))
-players[0].hand.extend(cardsOnTable)
-print(players[0].getHand())
-players[0].getHandResult()
-print(hands[players[0].result])
-print(makeCardsReadable(deck))
-
-'''
-
-'''
-players[0].hand=[card("A","Diamonds"),card("K","Hearts"),card("Q","Clubs"),card("J","Hearts"),card("10","Hearts"),card("9","Spades"),card("8","Hearts")]
-print(players[0].getHand())
-players[0].getHandResult(cardsOnTable)
-print(hands[players[0].result])
-'''
+players.append(player(startingMoney,"Jim"))
 
 def playRound(players,deck):
     cardsOnTable = []
-    players,cardsOnTable,deck = dealToAll(players,cardsOnTable,deck)
-    players,cardsOnTable,deck = dealToAll(players,cardsOnTable,deck)
+    players,deck = dealToPlayers(players,deck)
+    players,deck = dealToPlayers(players,deck)
+    #print(players[0].name + ", you have "+str(players[0].getHand()) +" and have $"+str(players[0].currentMoney)+". How much would you like to bet?")
+    #amountToBet = int(input())
+    #players[0].bet(amountToBet)
+    #players[1].bet(100)
+
     cardsOnTable,deck = dealToTable(cardsOnTable,deck)
     cardsOnTable,deck = dealToTable(cardsOnTable,deck)
     cardsOnTable,deck = dealToTable(cardsOnTable,deck)
+    cardsOnTable,deck = dealToTable(cardsOnTable,deck)
+    cardsOnTable,deck = dealToTable(cardsOnTable,deck)
+    print(players[0].name+" has "+str(players[0].getHand()))
+    print(players[1].name+" has "+str(players[1].getHand()))
     print(makeCardsReadable(cardsOnTable))
-    print(players[0].getHand())
-    players[0].getHandResult(cardsOnTable)
-    print(hands[players[0].result])
+    players[0].calculateHandResult(cardsOnTable)
+    players[1].calculateHandResult(cardsOnTable)
+    print(players[0].name+" has "+hands[players[0].result] +" with a "+str(players[0].topCard))
+    print(players[1].name+" has "+hands[players[1].result] +" with a "+str(players[1].topCard))
+    print(getWinner(players,cardsOnTable).name +" wins!")
+
 
     return (players,deck) # for changes in money and cards
 
 players,deck = playRound(players,deck)
 
+#players[0].hand=[card("J","Hearts"),card("J","Diamonds")]
+#players[1].hand = [card("9","Spades"),card("A","Spades")]
+#players.sort()
+#cardsOnTable = [card("8","Diamonds"),card("3","Diamonds"),card("10","Clubs"),card("5","Hearts"),card("A","Hearts")]
+#print(getWinner(players,cardsOnTable).name +" wins!")
+#print(players[0].topCard)
+#print(players[1].topCard)
 '''
 BUGS
 No way to deal with two players having the same hand, e.g. two players have pairs and so gets decided by the values.
 No way to deal with A working as 1 in a straight
 Does not discriminate between hands results being separate, e.g not a straight flush but a straight and a flush separately in the hand.
 '''
+
