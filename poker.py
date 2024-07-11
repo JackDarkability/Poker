@@ -1,25 +1,22 @@
 import random, copy
-
+SUITS = ["Hearts", "Diamonds", "Clubs", "Spades"]
+VALUES = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
+HANDS = [
+    "High Card",
+    "Pair",
+    "Two Pair",
+    "Three of a Kind",
+    "Straight",
+    "Flush",
+    "Full House",
+    "Four of a Kind",
+    "Straight Flush",
+]
 
 class Card:
     def __init__(self, value, suit):
         self.value = value
         self.suit = suit
-        self.values = [
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "10",
-            "J",
-            "Q",
-            "K",
-            "A",
-        ]  # value order
 
     def __str__(self):
         # So can print name of Card
@@ -30,28 +27,28 @@ class Card:
 
     def __gt__(self, other):
         # For comparing cards
-        if self.values.index(self.value) > self.values.index(other.value):
+        if VALUES.index(self.value) > VALUES.index(other.value):
             return True
         else:
             return False
 
     def __lt__(self, other):
         # For comparing cards
-        if self.values.index(self.value) < self.values.index(other.value):
+        if VALUES.index(self.value) < VALUES.index(other.value):
             return True
         else:
             return False
 
     def __le__(self, other):
         # For comparing cards
-        if self.values.index(self.value) <= self.values.index(other.value):
+        if VALUES.index(self.value) <= VALUES.index(other.value):
             return True
         else:
             return False
 
     def __ge__(self, other):
         # For comparing cards
-        if self.values.index(self.value) >= self.values.index(other.value):
+        if VALUES.index(self.value) >= VALUES.index(other.value):
             return True
         else:
             return False
@@ -59,9 +56,15 @@ class Card:
 
 class Player:
     def __init__(self, starting_money, name):
+        #id info
         self.name = name
+
+        # Current round information
         self.hand = []
         self.amount_betted = 0
+        self.folded = False
+
+        # Money information
         self.current_money = starting_money
         self.money_won = (
             0  # This will be how much money won in total throughout the game
@@ -69,7 +72,8 @@ class Player:
         self.money_lost = (
             0  # This will be how much money lost in total throughout the game
         )
-        self.folded = False
+
+        # Final hand information
         self.result = 0  # Holds numerical value on hand result, 0 being high Card and 8 being straight flush
         self.top_card = None  # Holds top Card so can be compared when equal hand type
 
@@ -170,10 +174,13 @@ def calculate_hand_result(
         return (3, max(counts, key=counts.get))
 
     if list(counts.values()).count(2) == 2:  # Two pair
-        return (
-            2,
-            max(counts, key=counts.get),
-        )  # Might get lower of the 2 pairs, will have to check
+        num_1 = max(counts, key=counts.get)
+        counts[max(counts, key=counts.get)] = 0 # So can find the other pair
+        num_2 = max(counts, key=counts.get)
+        if VALUES.index(num_1) > VALUES.index(num_2):
+            return (2, num_1)
+        else:
+            return (2, num_2)
 
     if counts[max(counts, key=counts.get)] == 2:  # Pair
         return (1, max(counts, key=counts.get))
@@ -190,7 +197,7 @@ def is_straight(cards):
         max_sequence_counter = 1
     for index, card in enumerate(cards):
         try:
-            if values.index(card.value) + 1 == values.index(cards[index + 1].value):
+            if VALUES.index(card.value) + 1 == VALUES.index(cards[index + 1].value):
                 sequence_counter += 1
             else:
                 if sequence_counter > max_sequence_counter:
@@ -214,7 +221,7 @@ def is_flush(cards):
     for card in cards:
         suits_of_cards.append(card.suit)
 
-    for suit in suits:
+    for suit in SUITS:
         if suits_of_cards.count(suit) >= 5:
             for card in cards:
                 if card.suit == suit:
@@ -320,6 +327,7 @@ def betting_round(players, first_round):
                 print("INVALID INPUT, WRONG. FOLDING.")
                 player.fold()
 
+    # Circular betting loop until all players have bet the same amount
     while (all_bet_same(players) == False) and one_person_left(players) == False:
         for player in players:
             if player.folded or (player.amount_betted == get_max_betted(players)):
@@ -383,38 +391,9 @@ def get_max_betted(players):
             maxBetted = player.amount_betted
     return maxBetted
 
+def play_round(players, deck, blind_cost = 10):
+    cards_on_table = []
 
-deck = []
-suits = ["Hearts", "Diamonds", "Clubs", "Spades"]
-values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
-hands = [
-    "High Card",
-    "Pair",
-    "Two Pair",
-    "Three of a Kind",
-    "Straight",
-    "Flush",
-    "Full House",
-    "Four of a Kind",
-    "Straight Flush",
-]
-players = []
-cards_on_table = []
-starting_money = 1000
-blindCost = 10
-
-for suit in suits:
-    for value in values:
-        deck.append(Card(value, suit))
-
-random.shuffle(deck)
-
-
-players.append(Player(starting_money, "Dave"))
-players.append(Player(starting_money, "Jim"))
-
-
-def play_round(players, deck):
     players.append(players.pop(0))  # Rotate players
     cards_on_table = []
     for player in players:
@@ -425,12 +404,12 @@ def play_round(players, deck):
 
     for index, player in enumerate(players): # Beginnning blind
         if index == 0:
-            players[0].bet(blindCost // 2)
-            print(players[0].name + " bets a small blind of $" + str(blindCost // 2))
+            players[0].bet(blind_cost // 2)
+            print(players[0].name + " bets a small blind of $" + str(blind_cost // 2))
 
         elif index == 1:
-            players[1].bet(blindCost)
-            print(players[1].name + " bets a big blind of $" + str(blindCost))
+            players[1].bet(blind_cost)
+            print(players[1].name + " bets a big blind of $" + str(blind_cost))
 
     players = betting_round(players,True)
 
@@ -458,14 +437,14 @@ def play_round(players, deck):
     print(
         players[0].name
         + " has "
-        + hands[players[0].result]
+        + HANDS[players[0].result]
         + " with a "
         + str(players[0].top_card)
     )
     print(
         players[1].name
         + " has "
-        + hands[players[1].result]
+        + HANDS[players[1].result]
         + " with a "
         + str(players[1].top_card)
     )
@@ -481,22 +460,46 @@ def play_round(players, deck):
     return (players, deck)  # for changes in money and cards
 
 
-while True:
-    players, deck = play_round(players, deck)
-    for player in players:
-        print(player.name + " has $" + str(player.current_money))
-
-    print("Would you like to play another round?")
-    action = input()
-    if action == "no":
-        break
 
 
+def main():
+    deck = []
+
+    players = []
+    starting_money = 1000
+    blind_cost = 10
+
+    for suit in SUITS:
+        for value in VALUES:
+            deck.append(Card(value, suit))
+
+    random.shuffle(deck)
+
+
+    players.append(Player(starting_money, "Dave"))
+    players.append(Player(starting_money, "Jim"))
+
+
+
+
+
+    while True:
+        players, deck = play_round(players, deck,blind_cost)
+        for player in players:
+            print(player.name + " has $" + str(player.current_money))
+
+        print("Would you like to play another round?")
+        action = input()
+        if action == "no":
+            break
+
+if __name__ == "__main__":
+    main()
     
 
 
 
 """
 BUGS
-Does not discriminate between hands results being separate, e.g not a straight flush but a straight and a flush separately in the hand.
+Does not discriminate between HANDS results being separate, e.g not a straight flush but a straight and a flush separately in the hand.
 """
