@@ -14,6 +14,7 @@ def get_winner(players, cards_on_table):
     players.sort(reverse=True)
     winning_index = 0
     winning_player = players[0]
+
     while winning_player.folded:
         print(winning_index)
         winning_index += 1
@@ -23,6 +24,7 @@ def get_winner(players, cards_on_table):
         if player.result == winning_player.result and player.folded == False:
             if Card(value=player.top_card) > Card(value=winning_player.top_card):
                 winning_player = player
+
     return winning_player
 
 
@@ -65,6 +67,7 @@ def one_person_left(players):
             players_left += 1
     if players_left == 1:
         return True
+    
     return False
 
 
@@ -80,6 +83,7 @@ def get_max_betted(players):
     for player in players:
         if player.amount_betted > max_betted:
             max_betted = player.amount_betted
+
     return max_betted
 
 
@@ -99,6 +103,7 @@ def get_winner(players, cards_on_table):
         if player.result == winning_player.result and player.folded == False:
             if Card(value=player.top_card) > Card(value=winning_player.top_card):
                 winning_player = player
+                
     return winning_player
 
 

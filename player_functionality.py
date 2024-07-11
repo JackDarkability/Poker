@@ -61,7 +61,7 @@ class Player:
     def get_hand(self):
         hand_readable = []
         for i in self.hand:
-            hand_readable.append(i.__str__())
+            hand_readable.append(str(i))
         return hand_readable
 
     def calculate_hand_result(self, cards_on_table):

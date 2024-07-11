@@ -40,7 +40,7 @@ class Card:
         # For comparing cards
         return VALUES.index(self.value) >= VALUES.index(other.value)
         
-        
+
 def calculate_hand_result(
     cards,
 ):  # cards is 7 cards in a list, representing the 5 cards on the table and 2 cards in hand.
@@ -155,5 +155,6 @@ def get_highest_card(cards):
 def make_cards_readable(list):
     readable_list = []
     for i in list:
-        readable_list.append(i.__str__())
+        readable_list.append(str(i))
+
     return readable_list
