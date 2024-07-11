@@ -43,25 +43,25 @@ class Player:
         self.lose()
 
     def __gt__(self, other):
-        # For seeing who wins. No functionality for if have same result yet (e.g. two players have pairs and so gets decided by the values.)
+        # For seeing who wins.
+        if(self.result == other.result):
+            return self.top_card > other.top_card
+        
         return self.result > other.result
 
     def __lt__(self, other):
-        # For seeing who wins
+        if(self.result == other.result):
+            return self.top_card < other.top_card
         return self.result < other.result
 
     def __le__(self, other):
-        # For seeing who wins
         return self.result <= other.result
 
     def __ge__(self, other):
-        # For seeing who wins
         return self.result >= other.result
 
     def get_hand(self):
-        hand_readable = []
-        for i in self.hand:
-            hand_readable.append(str(i))
+        hand_readable = list(map(str, self.hand)) # Get string representation of cards in hand
         return hand_readable
 
     def calculate_hand_result(self, cards_on_table):

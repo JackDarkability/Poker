@@ -57,16 +57,11 @@ def play_round(players, deck, blind_cost=10):
                     player.lose()
             break
 
+    print(make_cards_readable(cards_on_table))
     for player in players:
-        print(player.name + " has " + str(player.get_hand()))
-        player.calculate_hand_result(cards_on_table)
-        print(
-            player.name
-            + " has "
-            + HANDS[player.result]
-            + " with a "
-            + str(player.top_card)
-        )
+        if(player.folded==False):
+            player.calculate_hand_result(cards_on_table)
+            print(player.name + " has " + str(player.get_hand())+", a "+HANDS[player.result] + " with a " + str(player.top_card))
 
     winner = get_winner(players, cards_on_table)
     print(winner.name + " wins!")

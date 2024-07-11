@@ -95,7 +95,6 @@ def get_winner(players, cards_on_table):
     winning_index = 0
     winning_player = players[0]
     while winning_player.folded:
-        print(winning_index)
         winning_index += 1
         winning_player = players[winning_index]
 
@@ -103,7 +102,7 @@ def get_winner(players, cards_on_table):
         if player.result == winning_player.result and player.folded == False:
             if Card(value=player.top_card) > Card(value=winning_player.top_card):
                 winning_player = player
-                
+
     return winning_player
 
 
