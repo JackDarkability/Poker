@@ -1,5 +1,6 @@
 import copy
-from hand_functionality import Card, calculate_hand_result
+from hand_functionality import calculate_hand_result
+
 class Player:
     def __init__(self, starting_money, name):
         #id info
@@ -21,7 +22,7 @@ class Player:
 
         # Final hand information
         self.result = 0  # Holds numerical value on hand result, 0 being high Card and 8 being straight flush
-        self.top_card = None  # Holds top Card so can be compared when equal hand type
+        self.top_card = None  # Holds top Card value so can be compared when equal hand type
 
     def lose(self):
         self.money_lost += self.amount_betted
@@ -43,31 +44,19 @@ class Player:
 
     def __gt__(self, other):
         # For seeing who wins. No functionality for if have same result yet (e.g. two players have pairs and so gets decided by the values.)
-        if self.result > other.result:
-            return True
-        else:
-            return False
+        return self.result > other.result
 
     def __lt__(self, other):
         # For seeing who wins
-        if self.result < other.result:
-            return True
-        else:
-            return False
+        return self.result < other.result
 
     def __le__(self, other):
         # For seeing who wins
-        if self.result <= other.result:
-            return True
-        else:
-            return False
+        return self.result <= other.result
 
     def __ge__(self, other):
         # For seeing who wins
-        if self.result >= other.result:
-            return True
-        else:
-            return False
+        return self.result >= other.result
 
     def get_hand(self):
         hand_readable = []

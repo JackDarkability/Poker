@@ -20,8 +20,7 @@ def get_winner(players, cards_on_table):
 
     for player in players:
         if player.result == winning_player.result and player.folded == False:
-            if Card(player.top_card, "Hearts") > Card(winning_player.top_card, "Hearts"):
-                # Hearts is just a random suit to compare by
+            if Card(value=player.top_card) > Card(value=winning_player.top_card):
                 winning_player = player
     return winning_player
 
@@ -91,8 +90,7 @@ def get_winner(players, cards_on_table):
 
     for player in players:
         if player.result == winning_player.result and player.folded == False:
-            if Card(player.top_card, "Hearts") > Card(winning_player.top_card, "Hearts"):
-                # Hearts is just a random suit to compare by
+            if Card(value=player.top_card) > Card(value=winning_player.top_card):
                 winning_player = player
     return winning_player
 

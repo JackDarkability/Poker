@@ -57,31 +57,23 @@ def play_round(players, deck, blind_cost=10):
                     player.lose()
             break
 
-    print(players[0].name + " has " + str(players[0].get_hand()))
-    print(players[1].name + " has " + str(players[1].get_hand()))
-    print(make_cards_readable(cards_on_table))
-    players[0].calculate_hand_result(cards_on_table)
-    players[1].calculate_hand_result(cards_on_table)
-    print(
-        players[0].name
-        + " has "
-        + HANDS[players[0].result]
-        + " with a "
-        + str(players[0].top_card)
-    )
-    print(
-        players[1].name
-        + " has "
-        + HANDS[players[1].result]
-        + " with a "
-        + str(players[1].top_card)
-    )
+    for player in players:
+        print(player.name + " has " + str(player.get_hand()))
+        player.calculate_hand_result(cards_on_table)
+        print(
+            player.name
+            + " has "
+            + HANDS[player.result]
+            + " with a "
+            + str(player.top_card)
+        )
+
     winner = get_winner(players, cards_on_table)
     print(winner.name + " wins!")
 
     for player in players:
         if player.name == winner.name:
-            player.win(sum([player.amount_betted for player in players]))
+            player.win(sum([player2.amount_betted for player2 in players]))
         else:
             player.lose()
 
@@ -119,6 +111,9 @@ def betting_round(players, first_round):
             else:
                 print("INVALID INPUT, WRONG. FOLDING.")
                 player.fold()
+
+            if(one_person_left(players)):
+                break
 
     # Circular betting loop until all players have bet the same amount
     while (all_bet_same(players) == False) and one_person_left(players) == False:

@@ -13,7 +13,7 @@ HANDS = [
 ]
 
 class Card:
-    def __init__(self, value, suit):
+    def __init__(self, value="2", suit="Hearts"):
         self.value = value
         self.suit = suit
 
@@ -26,31 +26,19 @@ class Card:
 
     def __gt__(self, other):
         # For comparing cards
-        if VALUES.index(self.value) > VALUES.index(other.value):
-            return True
-        else:
-            return False
+        return VALUES.index(self.value) > VALUES.index(other.value)
 
     def __lt__(self, other):
         # For comparing cards
-        if VALUES.index(self.value) < VALUES.index(other.value):
-            return True
-        else:
-            return False
+        return VALUES.index(self.value) < VALUES.index(other.value)
 
     def __le__(self, other):
         # For comparing cards
-        if VALUES.index(self.value) <= VALUES.index(other.value):
-            return True
-        else:
-            return False
+        return VALUES.index(self.value) <= VALUES.index(other.value)
 
     def __ge__(self, other):
         # For comparing cards
-        if VALUES.index(self.value) >= VALUES.index(other.value):
-            return True
-        else:
-            return False
+        return VALUES.index(self.value) >= VALUES.index(other.value)
         
 def calculate_hand_result(
     cards,
