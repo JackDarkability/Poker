@@ -1,6 +1,7 @@
 from hand_functionality import Card, SUITS, VALUES
 import random
 
+
 def get_winner(players, cards_on_table):
     '''
     Calculates the winner of the round based on the players' hands and the cards on the table
@@ -24,6 +25,7 @@ def get_winner(players, cards_on_table):
                 winning_player = player
     return winning_player
 
+
 def deal_to_all(players, cards_on_table, deck):
     (players, deck) = deal_to_players(players, deck)
     (cards_on_table, deck) = deal_to_table(cards_on_table, deck)
@@ -38,9 +40,11 @@ def deal_to_players(players, deck):
 
     return (players, deck)
 
+
 def deal_to_table(cards_on_table, deck):
     cards_on_table.append(deck.pop())
     return (cards_on_table, deck)
+
 
 def all_bet_same(players):
     bet_amount = 0
@@ -53,6 +57,7 @@ def all_bet_same(players):
             return False
     return True
 
+
 def one_person_left(players):
     players_left = 0
     for player in players:
@@ -61,6 +66,7 @@ def one_person_left(players):
     if players_left == 1:
         return True
     return False
+
 
 def print_betted_amount(players):
     for player in players:
@@ -75,6 +81,7 @@ def get_max_betted(players):
         if player.amount_betted > max_betted:
             max_betted = player.amount_betted
     return max_betted
+
 
 def get_winner(players, cards_on_table):
     for player in players:
@@ -93,6 +100,7 @@ def get_winner(players, cards_on_table):
             if Card(value=player.top_card) > Card(value=winning_player.top_card):
                 winning_player = player
     return winning_player
+
 
 def create_deck():
     deck = []

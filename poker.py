@@ -2,6 +2,7 @@ from player_functionality import Player
 from dealer_functionality import create_deck
 from game_loop_functionality import play_round
 
+
 def main():
     deck = create_deck()
     players = []
@@ -24,13 +25,11 @@ def main():
         if action == "no":
             break
 
+
 if __name__ == "__main__":
     main()
     
 """
 BUGS
 Does not discriminate between hands results being separate, e.g not a straight flush but a straight and a flush separately in the hand.
-
-When the 3 cards are placed on the table. If it is only 2 players left and the first person to be asked folds. The second person will still be asked to bet, even though they are the only one left.
-
 """
