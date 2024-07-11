@@ -44,9 +44,13 @@ def deal_to_table(cards_on_table, deck):
     return (cards_on_table, deck)
 
 def all_bet_same(players):
-    bet_amount = players[0].amount_betted
+    bet_amount = 0
     for player in players:
-        if player.amount_betted != bet_amount and (not player.folded):
+        if (player.amount_betted > bet_amount and (not player.folded)):
+            bet_amount = player.amount_betted
+
+    for player in players:
+        if (player.amount_betted != bet_amount and (not player.folded)):
             return False
     return True
 

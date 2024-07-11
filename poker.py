@@ -31,11 +31,6 @@ if __name__ == "__main__":
 BUGS
 Does not discriminate between hands results being separate, e.g not a straight flush but a straight and a flush separately in the hand.
 
-Get stuck in an infinite loop in the game loop.
-Steps can be recreated by:
-- Creating a game with 3 players and a big blind of 10 and starting money of 1000
-- Call as the 3rd player
-- Fold as the 1st player (The one who did the small blind)
-- Then the game will get stuck in an infinite loop
+When the 3 cards are placed on the table. If it is only 2 players left and the first person to be asked folds. The second person will still be asked to bet, even though they are the only one left.
 
 """
