@@ -1,7 +1,7 @@
 import random, copy
 
 
-class card:
+class Card:
     def __init__(self, value, suit):
         self.value = value
         self.suit = suit
@@ -22,7 +22,7 @@ class card:
         ]  # value order
 
     def __str__(self):
-        # So can print name of card
+        # So can print name of Card
         return f"{self.value} of {self.suit}"
 
     def __eq__(self, other):
@@ -57,35 +57,35 @@ class card:
             return False
 
 
-class player:
-    def __init__(self, startingMoney, name):
+class Player:
+    def __init__(self, starting_money, name):
         self.name = name
         self.hand = []
-        self.amountBetted = 0
-        self.currentMoney = startingMoney
-        self.moneyWon = (
+        self.amount_betted = 0
+        self.current_money = starting_money
+        self.money_won = (
             0  # This will be how much money won in total throughout the game
         )
-        self.moneyLost = (
+        self.money_lost = (
             0  # This will be how much money lost in total throughout the game
         )
         self.folded = False
-        self.result = 0  # Holds numerical value on hand result, 0 being high card and 8 being straight flush
-        self.topCard = None  # Holds top card so can be compared when equal hand type
+        self.result = 0  # Holds numerical value on hand result, 0 being high Card and 8 being straight flush
+        self.top_card = None  # Holds top Card so can be compared when equal hand type
 
     def lose(self):
-        self.moneyLost += self.amountBetted
+        self.money_lost += self.amount_betted
 
-    def win(self, moneyInPot):
-        self.moneyWon += moneyInPot
-        self.currentMoney += moneyInPot
+    def win(self, money_in_pot):
+        self.money_won += money_in_pot
+        self.current_money += money_in_pot
 
     def bet(self, amount):
-        if amount > self.currentMoney:
+        if amount > self.current_money:
             raise Exception("Not enough money to bet that much")
         else:
-            self.amountBetted += amount
-            self.currentMoney -= amount
+            self.amount_betted += amount
+            self.current_money -= amount
 
     def fold(self):
         self.folded = True
@@ -119,38 +119,38 @@ class player:
         else:
             return False
 
-    def getHand(self):
-        handReadable = []
+    def get_hand(self):
+        hand_readable = []
         for i in self.hand:
-            handReadable.append(i.__str__())
-        return handReadable
+            hand_readable.append(i.__str__())
+        return hand_readable
 
-    def calculateHandResult(self, cardsOnTable):
-        fullHand = [copy.deepcopy(card) for card in self.hand]
-        fullHand.extend(cardsOnTable)
-        self.result, self.topCard = calculateHandResult(fullHand)
+    def calculate_hand_result(self, cards_on_table):
+        full_hand = [copy.deepcopy(card) for card in self.hand]
+        full_hand.extend(cards_on_table)
+        self.result, self.top_card = calculate_hand_result(full_hand)
 
     def reset(self):
         self.hand = []
-        self.amountBetted = 0
+        self.amount_betted = 0
         self.folded = False
-        self.result = 0  # Holds numerical value on hand result, 0 being high card and 8 being straight flush
-        self.topCard = None  # Holds top card so can be compared when equal hand type
+        self.result = 0  # Holds numerical value on hand result, 0 being high Card and 8 being straight flush
+        self.top_card = None  # Holds top Card so can be compared when equal hand type
 
 
-def calculateHandResult(
+def calculate_hand_result(
     cards,
 ):  # cards is 7 cards in a list, representing the 5 cards on the table and 2 cards in hand.
 
     # Need to add functionality for where same hand can be made by multiple players, e.g. two players have pairs and so gets decided by the values.
     cards.sort()
-    cardIsStraight, maxCardStraight = isStraight(cards)
-    cardIsFlush, maxCardFlush = isFlush(cards)
-    counts = getCountsOfCards(cards)
-    highestCard = getHighestCard(cards)
+    card_is_straight, max_card_straight = is_straight(cards)
+    card_is_flush, max_card_flush = is_flush(cards)
+    counts = get_counts_of_cards(cards)
+    highest_card = get_highest_card(cards)
 
-    if cardIsStraight and cardIsFlush:  # Straight flush
-        return (8, maxCardStraight.value)
+    if card_is_straight and card_is_flush:  # Straight flush
+        return (8, max_card_straight.value)
 
     if counts[max(counts, key=counts.get)] >= 4:  # 4 of a kind
         return 7, max(counts, key=counts.get)
@@ -160,11 +160,11 @@ def calculateHandResult(
     ):  # Full house
         return 6, max(counts, key=counts.get)
 
-    if cardIsFlush:  # Flush
-        return (5, maxCardFlush.value)
+    if card_is_flush:  # Flush
+        return (5, max_card_flush.value)
 
-    if cardIsStraight:  # Straight
-        return (4, maxCardStraight.value)
+    if card_is_straight:  # Straight
+        return (4, max_card_straight.value)
 
     if counts[max(counts, key=counts.get)] == 3:  # 3 of a kind
         return (3, max(counts, key=counts.get))
@@ -178,44 +178,44 @@ def calculateHandResult(
     if counts[max(counts, key=counts.get)] == 2:  # Pair
         return (1, max(counts, key=counts.get))
 
-    return 0, highestCard.value  # High card
+    return 0, highest_card.value  # High Card
 
 
-def isStraight(cards):
-    maxSequenceCounter = 0
-    maxCardOfSequence = cards[0]
-    sequenceCounter = 0
+def is_straight(cards):
+    max_sequence_counter = 0
+    max_card_of_sequence = cards[0]
+    sequence_counter = 0
     if cards[0].value == "2" and cards[-1].value == "A":
-        maxCardOfSequence = cards[-1]
-        maxSequenceCounter = 1
+        max_card_of_sequence = cards[-1]
+        max_sequence_counter = 1
     for index, card in enumerate(cards):
         try:
             if values.index(card.value) + 1 == values.index(cards[index + 1].value):
-                sequenceCounter += 1
+                sequence_counter += 1
             else:
-                if sequenceCounter > maxSequenceCounter:
-                    maxSequenceCounter = sequenceCounter
-                    maxCardOfSequence = card
-                sequenceCounter = 0
+                if sequence_counter > max_sequence_counter:
+                    max_sequence_counter = sequence_counter
+                    max_card_of_sequence = card
+                sequence_counter = 0
         except IndexError:
-            if sequenceCounter > maxSequenceCounter:
-                maxSequenceCounter = sequenceCounter
-            sequenceCounter = 0
+            if sequence_counter > max_sequence_counter:
+                max_sequence_counter = sequence_counter
+            sequence_counter = 0
 
-    if maxSequenceCounter >= 4:
-        return (True, maxCardOfSequence)
+    if max_sequence_counter >= 4:
+        return (True, max_card_of_sequence)
 
     else:
-        return (False, maxCardOfSequence)
+        return (False, max_card_of_sequence)
 
 
-def isFlush(cards):
-    suitsOfCards = []
+def is_flush(cards):
+    suits_of_cards = []
     for card in cards:
-        suitsOfCards.append(card.suit)
+        suits_of_cards.append(card.suit)
 
     for suit in suits:
-        if suitsOfCards.count(suit) >= 5:
+        if suits_of_cards.count(suit) >= 5:
             for card in cards:
                 if card.suit == suit:
                     maxCardOfFlush = card
@@ -224,57 +224,55 @@ def isFlush(cards):
     return (False, None)
 
 
-def getCountsOfCards(cards):
-    # Gets the counts of each card in the list of cards
+def get_counts_of_cards(cards):
+    # Gets the counts of each Card in the list of cards
     counts = {}
     for card in cards:
         amount = sum(x.value == card.value for x in cards)
         counts[card.value] = (
-            amount  # Slight inefficiency here as will check same card multiple times, but it's fine as the list of cards is small
+            amount  # Slight inefficiency here as will check same Card multiple times, but it's fine as the list of cards is small
         )
 
     return counts
 
 
-def getHighestCard(cards):
-    # For high card
-    highestCard = cards[0]
+def get_highest_card(cards):
+    # For high Card
+    highest_card = cards[0]
     for card in cards:
-        if card > highestCard:
-            highestCard = card
+        if card > highest_card:
+            highest_card = card
 
-    return highestCard
+    return highest_card
 
 
-def getWinner(players, cardsOnTable):
-    # tempHand = [copy.deepcopy(player) for player in players]
+def get_winner(players, cards_on_table):
     for player in players:
-        player.calculateHandResult(cardsOnTable)
-        # print(player.name+" has "+str(hands[player.result]) + ", a "+str(player.result))
+        player.calculate_hand_result(cards_on_table)
 
     players.sort(reverse=True)
-    winningIndex = 0
-    winningPlayer = players[0]
-    while winningPlayer.folded:
-        print(winningIndex)
-        winningIndex += 1
-        winningPlayer = players[winningIndex]
+    winning_index = 0
+    winning_player = players[0]
+    while winning_player.folded:
+        print(winning_index)
+        winning_index += 1
+        winning_player = players[winning_index]
 
     for player in players:
-        if player.result == winningPlayer.result and player.folded == False:
-            if card(player.topCard, "Hearts") > card(winningPlayer.topCard, "Hearts"):
+        if player.result == winning_player.result and player.folded == False:
+            if Card(player.top_card, "Hearts") > Card(winning_player.top_card, "Hearts"):
                 # Hearts is just a random suit to compare by
-                winningPlayer = player
-    return winningPlayer
+                winning_player = player
+    return winning_player
 
 
-def dealToAll(players, cardsOnTable, deck):
-    (players, deck) = dealToPlayers(players, deck)
-    (cardsOnTable, deck) = dealToTable(cardsOnTable, deck)
-    return (players, cardsOnTable, deck)
+def deal_to_all(players, cards_on_table, deck):
+    (players, deck) = deal_to_players(players, deck)
+    (cards_on_table, deck) = deal_to_table(cards_on_table, deck)
+    return (players, cards_on_table, deck)
 
 
-def dealToPlayers(players, deck):
+def deal_to_players(players, deck):
     for i in range(len(players)):
         if players[i].folded:
             continue
@@ -283,106 +281,106 @@ def dealToPlayers(players, deck):
     return (players, deck)
 
 
-def dealToTable(cardsOnTable, deck):
-    cardsOnTable.append(deck.pop())
-    return (cardsOnTable, deck)
+def deal_to_table(cards_on_table, deck):
+    cards_on_table.append(deck.pop())
+    return (cards_on_table, deck)
 
 
-def makeCardsReadable(list):
-    readableList = []
+def make_cards_readable(list):
+    readable_list = []
     for i in list:
-        readableList.append(i.__str__())
-    return readableList
+        readable_list.append(i.__str__())
+    return readable_list
 
 
-def bettingRound(players, firstRound):
-    if onePersonLeft(players) == False:
+def betting_round(players, first_round):
+    if one_person_left(players) == False:
         for index, player in enumerate(players):  # First pass
-            if player.folded or ((index==0 or index==1) and firstRound):
+            if player.folded or ((index==0 or index==1) and first_round):
                 continue
-            printBettedAmount(players)
+            print_betted_amount(players)
             print(
                 player.name
                 + ", you have "
-                + str(player.getHand())
+                + str(player.get_hand())
                 + " and have $"
-                + str(player.currentMoney)
+                + str(player.current_money)
                 + ". would you like to fold,check/call or raise?"
             )
             action = input()
             if action == "fold":
                 player.fold()
             elif action == "call" or action == "check":
-                player.bet(getMaxBetted(players) - player.amountBetted)
+                player.bet(get_max_betted(players) - player.amount_betted)
             elif action == "raise":
                 print("How much would you like to raise by?")
-                amountToBet = int(input())
-                player.bet(amountToBet)
+                amount_to_bet = int(input())
+                player.bet(amount_to_bet)
             else:
                 print("INVALID INPUT, WRONG. FOLDING.")
                 player.fold()
 
-    while (allBetSame(players) == False) and onePersonLeft(players) == False:
+    while (all_bet_same(players) == False) and one_person_left(players) == False:
         for player in players:
-            if player.folded or (player.amountBetted == getMaxBetted(players)):
+            if player.folded or (player.amount_betted == get_max_betted(players)):
                 continue
-            printBettedAmount(players)
+            print_betted_amount(players)
             print(
                 player.name
                 + ", you have "
-                + str(player.getHand())
+                + str(player.get_hand())
                 + " and have $"
-                + str(player.currentMoney)
+                + str(player.current_money)
                 + ". would you like to fold,call or raise?"
             )
             action = input()
             if action == "fold":
                 player.fold()
             elif action == "call":
-                player.bet(getMaxBetted(players) - player.amountBetted)
+                player.bet(get_max_betted(players) - player.amount_betted)
             elif action == "raise":
                 print("How much would you like to raise by?")
-                amountToBet = int(input())
-                player.bet(amountToBet)
+                amount_to_bet = int(input())
+                player.bet(amount_to_bet)
             else:
                 print("INVALID INPUT, WRONG. FOLDING.")
                 player.fold()
 
-            if allBetSame(players) or onePersonLeft(players):
+            if all_bet_same(players) or one_person_left(players):
                 break
     return players
 
 
-def allBetSame(players):
-    betAmount = players[0].amountBetted
+def all_bet_same(players):
+    bet_amount = players[0].amount_betted
     for player in players:
-        if player.amountBetted != betAmount and (not player.folded):
+        if player.amount_betted != bet_amount and (not player.folded):
             return False
     return True
 
 
-def onePersonLeft(players):
-    playersLeft = 0
+def one_person_left(players):
+    players_left = 0
     for player in players:
         if not player.folded:
-            playersLeft += 1
-    if playersLeft == 1:
+            players_left += 1
+    if players_left == 1:
         return True
     return False
 
 
-def printBettedAmount(players):
+def print_betted_amount(players):
     for player in players:
         if player.folded:
             continue
-        print(player.name + " has betted $" + str(player.amountBetted))
+        print(player.name + " has betted $" + str(player.amount_betted))
 
 
-def getMaxBetted(players):
+def get_max_betted(players):
     maxBetted = 0
     for player in players:
-        if player.amountBetted > maxBetted:
-            maxBetted = player.amountBetted
+        if player.amount_betted > maxBetted:
+            maxBetted = player.amount_betted
     return maxBetted
 
 
@@ -401,29 +399,29 @@ hands = [
     "Straight Flush",
 ]
 players = []
-cardsOnTable = []
-startingMoney = 1000
+cards_on_table = []
+starting_money = 1000
 blindCost = 10
 
 for suit in suits:
     for value in values:
-        deck.append(card(value, suit))
+        deck.append(Card(value, suit))
 
 random.shuffle(deck)
 
 
-players.append(player(startingMoney, "Dave"))
-players.append(player(startingMoney, "Jim"))
+players.append(Player(starting_money, "Dave"))
+players.append(Player(starting_money, "Jim"))
 
 
-def playRound(players, deck):
+def play_round(players, deck):
     players.append(players.pop(0))  # Rotate players
-    cardsOnTable = []
+    cards_on_table = []
     for player in players:
         player.reset()
 
-    players, deck = dealToPlayers(players, deck)
-    players, deck = dealToPlayers(players, deck)
+    players, deck = deal_to_players(players, deck)
+    players, deck = deal_to_players(players, deck)
 
     for index, player in enumerate(players): # Beginnning blind
         if index == 0:
@@ -434,49 +432,49 @@ def playRound(players, deck):
             players[1].bet(blindCost)
             print(players[1].name + " bets a big blind of $" + str(blindCost))
 
-    players = bettingRound(players,True)
+    players = betting_round(players,True)
 
     stages = [3,1,1] # How many cards to flip before each round of betting
     for stage in stages:
         for i in range(stage): 
-            cardsOnTable,deck = dealToTable(cardsOnTable, deck)
-        print(makeCardsReadable(cardsOnTable))
-        players = bettingRound(players,False)
-        if onePersonLeft(players):
+            cards_on_table,deck = deal_to_table(cards_on_table, deck)
+        print(make_cards_readable(cards_on_table))
+        players = betting_round(players,False)
+        if one_person_left(players):
             print("Only one person left, they win!")
             for player in players:
                 if not player.folded:
                     print(player.name + " wins!")
-                    player.win(sum([player.amountBetted for player in players]))
+                    player.win(sum([player2.amount_betted for player2 in players]))
                 else:
                     player.lose()
             break
 
-    print(players[0].name + " has " + str(players[0].getHand()))
-    print(players[1].name + " has " + str(players[1].getHand()))
-    print(makeCardsReadable(cardsOnTable))
-    players[0].calculateHandResult(cardsOnTable)
-    players[1].calculateHandResult(cardsOnTable)
+    print(players[0].name + " has " + str(players[0].get_hand()))
+    print(players[1].name + " has " + str(players[1].get_hand()))
+    print(make_cards_readable(cards_on_table))
+    players[0].calculate_hand_result(cards_on_table)
+    players[1].calculate_hand_result(cards_on_table)
     print(
         players[0].name
         + " has "
         + hands[players[0].result]
         + " with a "
-        + str(players[0].topCard)
+        + str(players[0].top_card)
     )
     print(
         players[1].name
         + " has "
         + hands[players[1].result]
         + " with a "
-        + str(players[1].topCard)
+        + str(players[1].top_card)
     )
-    winner = getWinner(players, cardsOnTable)
+    winner = get_winner(players, cards_on_table)
     print(winner.name + " wins!")
 
     for player in players:
         if player.name == winner.name:
-            player.win(sum([player.amountBetted for player in players]))
+            player.win(sum([player.amount_betted for player in players]))
         else:
             player.lose()
 
@@ -484,9 +482,9 @@ def playRound(players, deck):
 
 
 while True:
-    players, deck = playRound(players, deck)
+    players, deck = play_round(players, deck)
     for player in players:
-        print(player.name + " has $" + str(player.currentMoney))
+        print(player.name + " has $" + str(player.current_money))
 
     print("Would you like to play another round?")
     action = input()
