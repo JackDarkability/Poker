@@ -1,9 +1,10 @@
 import copy
 from hand_functionality import calculate_hand_result
 
+
 class Player:
     def __init__(self, starting_money, name):
-        #id info
+        # id info
         self.name = name
 
         # Current round information
@@ -22,7 +23,9 @@ class Player:
 
         # Final hand information
         self.result = 0  # Holds numerical value on hand result, 0 being high Card and 8 being straight flush
-        self.top_card = None  # Holds top Card value so can be compared when equal hand type
+        self.top_card = (
+            None  # Holds top Card value so can be compared when equal hand type
+        )
 
     def lose(self):
         self.money_lost += self.amount_betted
@@ -44,13 +47,13 @@ class Player:
 
     def __gt__(self, other):
         # For seeing who wins.
-        if(self.result == other.result):
+        if self.result == other.result:
             return self.top_card > other.top_card
-        
+
         return self.result > other.result
 
     def __lt__(self, other):
-        if(self.result == other.result):
+        if self.result == other.result:
             return self.top_card < other.top_card
         return self.result < other.result
 
@@ -61,7 +64,9 @@ class Player:
         return self.result >= other.result
 
     def get_hand(self):
-        hand_readable = list(map(str, self.hand)) # Get string representation of cards in hand
+        hand_readable = list(
+            map(str, self.hand)
+        )  # Get string representation of cards in hand
         return hand_readable
 
     def calculate_hand_result(self, cards_on_table):
@@ -75,4 +80,3 @@ class Player:
         self.folded = False
         self.result = 0  # Holds numerical value on hand result, 0 being high Card and 8 being straight flush
         self.top_card = None  # Holds top Card so can be compared when equal hand type
-    

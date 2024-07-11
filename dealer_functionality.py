@@ -3,11 +3,11 @@ import random
 
 
 def get_winner(players, cards_on_table):
-    '''
+    """
     Calculates the winner of the round based on the players' hands and the cards on the table
     players: list of Players which holds the players' hands
     cards_on_table: list of Cards which are the 5 cards in the flop
-    '''
+    """
     for player in players:
         player.calculate_hand_result(cards_on_table)
 
@@ -51,11 +51,11 @@ def deal_to_table(cards_on_table, deck):
 def all_bet_same(players):
     bet_amount = 0
     for player in players:
-        if (player.amount_betted > bet_amount and (not player.folded)):
+        if player.amount_betted > bet_amount and (not player.folded):
             bet_amount = player.amount_betted
 
     for player in players:
-        if (player.amount_betted != bet_amount and (not player.folded)):
+        if player.amount_betted != bet_amount and (not player.folded):
             return False
     return True
 
@@ -67,7 +67,7 @@ def one_person_left(players):
             players_left += 1
     if players_left == 1:
         return True
-    
+
     return False
 
 

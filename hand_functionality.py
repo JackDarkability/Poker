@@ -12,6 +12,7 @@ HANDS = [
     "Straight Flush",
 ]
 
+
 class Card:
     def __init__(self, value="2", suit="Hearts"):
         self.value = value
@@ -39,7 +40,7 @@ class Card:
     def __ge__(self, other):
         # For comparing cards
         return VALUES.index(self.value) >= VALUES.index(other.value)
-        
+
 
 def calculate_hand_result(
     cards,
@@ -74,7 +75,7 @@ def calculate_hand_result(
 
     if list(counts.values()).count(2) == 2:  # Two pair
         num_1 = max(counts, key=counts.get)
-        counts[max(counts, key=counts.get)] = 0 # So can find the other pair
+        counts[max(counts, key=counts.get)] = 0  # So can find the other pair
         num_2 = max(counts, key=counts.get)
         if VALUES.index(num_1) > VALUES.index(num_2):
             return (2, num_1)

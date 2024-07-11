@@ -59,9 +59,17 @@ def play_round(players, deck, blind_cost=10):
 
     print(make_cards_readable(cards_on_table))
     for player in players:
-        if(player.folded==False):
+        if player.folded == False:
             player.calculate_hand_result(cards_on_table)
-            print(player.name + " has " + str(player.get_hand())+", a "+HANDS[player.result] + " with a " + str(player.top_card))
+            print(
+                player.name
+                + " has "
+                + str(player.get_hand())
+                + ", a "
+                + HANDS[player.result]
+                + " with a "
+                + str(player.top_card)
+            )
 
     winner = get_winner(players, cards_on_table)
     print(winner.name + " wins!")
@@ -76,10 +84,10 @@ def play_round(players, deck, blind_cost=10):
 
 
 def betting_round(players, first_round):
-    '''
+    """
     One round of betting, goes around the table of players until all players have bet the same amount or folded
     first_round: bool, if it is the first round of betting and therefore whether to skip the first 2 players as they have already bet the blinds
-    '''
+    """
 
     if one_person_left(players) == False:
         for index, player in enumerate(players):  # First pass
@@ -102,12 +110,14 @@ def betting_round(players, first_round):
             elif action == "raise":
                 print("How much would you like to raise by?")
                 amount_to_bet = int(input())
-                player.bet((get_max_betted(players) - player.amount_betted) + amount_to_bet)
+                player.bet(
+                    (get_max_betted(players) - player.amount_betted) + amount_to_bet
+                )
             else:
                 print("INVALID INPUT, WRONG. FOLDING.")
                 player.fold()
 
-            if(one_person_left(players)):
+            if one_person_left(players):
                 break
 
     # Circular betting loop until all players have bet the same amount
@@ -132,7 +142,9 @@ def betting_round(players, first_round):
             elif action == "raise":
                 print("How much would you like to raise by?")
                 amount_to_bet = int(input())
-                player.bet((get_max_betted(players) - player.amount_betted) + amount_to_bet)
+                player.bet(
+                    (get_max_betted(players) - player.amount_betted) + amount_to_bet
+                )
             else:
                 print("INVALID INPUT, WRONG. FOLDING.")
                 player.fold()
