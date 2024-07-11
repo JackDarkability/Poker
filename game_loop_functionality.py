@@ -103,16 +103,20 @@ def betting_round(players, first_round):
                 + ". would you like to fold,check/call or raise?"
             )
             action = input()
+
             if action == "fold":
                 player.fold()
+
             elif action == "call" or action == "check":
                 player.bet(get_max_betted(players) - player.amount_betted)
+
             elif action == "raise":
                 print("How much would you like to raise by?")
                 amount_to_bet = int(input())
                 player.bet(
                     (get_max_betted(players) - player.amount_betted) + amount_to_bet
                 )
+
             else:
                 print("INVALID INPUT, WRONG. FOLDING.")
                 player.fold()
@@ -137,14 +141,17 @@ def betting_round(players, first_round):
             action = input()
             if action == "fold":
                 player.fold()
+
             elif action == "call":
                 player.bet(get_max_betted(players) - player.amount_betted)
+
             elif action == "raise":
                 print("How much would you like to raise by?")
                 amount_to_bet = int(input())
                 player.bet(
                     (get_max_betted(players) - player.amount_betted) + amount_to_bet
                 )
+                
             else:
                 print("INVALID INPUT, WRONG. FOLDING.")
                 player.fold()

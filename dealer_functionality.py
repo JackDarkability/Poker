@@ -49,6 +49,9 @@ def deal_to_table(cards_on_table, deck):
 
 
 def all_bet_same(players):
+    '''
+    Check if all players have bet the same amount, so can continue on to next round
+    '''
     bet_amount = 0
     for player in players:
         if player.amount_betted > bet_amount and (not player.folded):
@@ -65,6 +68,7 @@ def one_person_left(players):
     for player in players:
         if not player.folded:
             players_left += 1
+
     if players_left == 1:
         return True
 
@@ -94,6 +98,8 @@ def get_winner(players, cards_on_table):
     players.sort(reverse=True)
     winning_index = 0
     winning_player = players[0]
+    
+    #Get the highest scoring player who hasn't folded
     while winning_player.folded:
         winning_index += 1
         winning_player = players[winning_index]
